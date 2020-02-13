@@ -1,82 +1,133 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <vector>
-#include <regex>
 #include <stack>
-#include <iostream>
-#include <cassert>
+#include <memory>
+#include <functional>
+#include <exception>
+#include <algorithm>
+
+class parser_error : public std::exception {
+private:
+  std::string what_;
+public:
+  explicit parser_error(std::string content):what_(content) {
+
+  }
+
+  const char* what() const noexcept override {
+    return what_.c_str();
+  }
+};
 
 class hparser {
 private:
-  int state_;
-  std::string raw_;
+  using string_type = std::string;
+  using char_type = typename string_type::value_type;
 
-  struct html_element {
-    std::string label_;
-    std::vector<std::pair<std::string, std::string>> attrs_;
-    std::string content_;
-    std::vector<html_element> childs_;
+  string_type raw_;
+  string_type global_notes_;
+
+  class html_element {
+  private:
+    friend class hparser;
+    struct kv {
+      string_type key_;
+      string_type value_;
+    };
+    string_type tag_;
+    std::vector<kv> attrs_;
+    string_type content_;
+    std::vector<std::shared_ptr<html_element>> childs_;
+    std::weak_ptr<html_element> parent_;
+
+  public:
+    html_element() = default;
+
+    string_type tag() const {
+      return tag_;
+    }
+
+    string_type content() const {
+      return content_;
+    }
+
+    size_t attrs_size() const {
+      return attrs_.size();
+    }
+
+    size_t childs_size() const {
+      return childs_.size();
+    }
+
+    kv get_attr(size_t index) const {
+      return attrs_.at(index);
+    }
+
+    std::shared_ptr<html_element> get_child(size_t index) const {
+      return childs_.at(index);
+    }
+
+    std::vector<kv> get_all_attrs() const {
+      return attrs_;
+    }
+
+    std::vector<std::shared_ptr<html_element>> get_all_childs() const {
+      return childs_;
+    }
+
+    string_type operator[](string_type str) const {
+      auto it = std::find_if(attrs_.begin(), attrs_.end(), [&](const kv& each)->bool {
+                               return each.key_ == str;
+                             });
+      if(it != attrs_.end()) {
+        return it->value_;
+      }
+      return "";
+    }
+
+    bool root() const {
+      if(parent_.lock()) {
+        return false;
+      }
+      return true;
+    }
+
+    std::shared_ptr<html_element> parent() const {
+      return parent_.lock();
+    }
   };
 
-  html_element root_;
+  std::shared_ptr<html_element> root_;
+
+  void end_label_handle(std::stack<std::shared_ptr<html_element>>& s, size_t& begin);
+
+  void begin_label_handle(std::stack<std::shared_ptr<html_element>>& s, size_t& begin);
+
+  void note_label_handle(std::stack<std::shared_ptr<html_element>>& s, size_t& begin);
+
+  void parse();
+
+  std::vector<std::shared_ptr<html_element>> hiera_trave_find(std::function<bool(std::shared_ptr<html_element>)> check_func) const;
 
 public:
-  explicit hparser(std::string str):raw_(str) {
+  using element_type = html_element;
 
+  string_type global_notes() const {
+    return global_notes_;
   }
 
-  void parse() {
-    std::stack<html_element> s;
-    std::vector<html_element> current_elements_;
-    int begin = 0;
-    state_ = 0;
+  explicit hparser(std::string str);
 
-    while(begin < raw_.size()) {
-
-      if(raw_[begin] == '<') {
-        int j = begin;
-        if(raw_[begin + 1] == '/') {
-          //结束标签
-          while(raw_[j] != '>') {
-            ++j;
-          }
-          std::string end_label = raw_.substr(begin + 2, j - begin - 2);
-          auto this_e = s.top();
-          s.pop();
-          if(state_ == 1) {
-            for(auto it = current_elements_.begin(); it!=current_elements_.end(); ++it) {
-              this_e.childs_.push_back(*it);
-            }
-            current_elements_.clear();
-            current_elements_.push_back(this_e);
-          }
-          else {
-            current_elements_.push_back(this_e);
-          }
-          state_ = 1;
-        }
-        else {
-          //开始标签
-          while(true) {
-            if(raw_[j] == '>' || raw_[j] == ' ') {
-              break;
-            }
-            ++j;
-          }
-          html_element tmp;
-          tmp.label_ = raw_.substr(begin + 1, j - begin - 1);
-          if(j == ' ') {
-            //处理属性
-          }
-          s.push(tmp);
-          state_ = 0;
-        }
-        begin = j;
-      }
-      else {
-        ++begin;
-      }
-    }
-    root_ = s.top();
+  std::shared_ptr<html_element> get_root() const {
+    return root_;
   }
+
+  std::vector<std::shared_ptr<html_element>> find_tag(std::string str) const;
+
+  std::vector<std::shared_ptr<html_element>> find_attr(std::string str) const;
+
+  std::vector<std::shared_ptr<html_element>> find_content(std::string str) const;
+
+  std::vector<std::shared_ptr<html_element>> find(std::function<bool(std::shared_ptr<html_element> each)> func) const;
 };
