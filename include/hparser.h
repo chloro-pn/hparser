@@ -113,23 +113,23 @@ private:
   std::vector<std::shared_ptr<html_element>> hiera_trave_find(std::function<bool(std::shared_ptr<html_element>)> check_func) const;
 
 public:
-  using element_type = html_element;
-
   string_type global_notes() const {
     return global_notes_;
   }
 
   explicit hparser(std::string str);
 
-  std::shared_ptr<html_element> get_root() const {
+  using element_type = html_element;
+
+  std::shared_ptr<element_type> get_root() const {
     return root_;
   }
 
-  std::vector<std::shared_ptr<html_element>> find_tag(std::string str) const;
+  std::vector<std::shared_ptr<element_type>> find_tag(std::string str) const;
 
-  std::vector<std::shared_ptr<html_element>> find_attr(std::string str) const;
+  std::vector<std::shared_ptr<element_type>> find_attr(std::string str) const;
 
-  std::vector<std::shared_ptr<html_element>> find_content(std::string str) const;
+  std::vector<std::shared_ptr<element_type>> find_content(std::string str) const;
 
   std::vector<std::shared_ptr<html_element>> find(std::function<bool(std::shared_ptr<html_element> each)> func) const;
 };
