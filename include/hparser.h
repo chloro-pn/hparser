@@ -131,5 +131,5 @@ public:
 
   std::vector<std::shared_ptr<element_type>> find_content(std::string str) const;
 
-  std::vector<std::shared_ptr<html_element>> find(std::function<bool(std::shared_ptr<html_element> each)> func) const;
+  std::vector<std::shared_ptr<element_type>> find(std::function<bool(std::shared_ptr<element_type> each)> func) const;
 };
