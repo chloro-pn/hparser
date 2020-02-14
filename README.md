@@ -4,8 +4,9 @@ hparser is a light-weight, simple and fast xhtml parser library for c++11 with D
 hparser 仅提供访问接口，不提供修改接口。
 
 hparser 可基于正则表达式进行访问和查询。由于std::regex目前对unicode的支持有限，因此如果你使用ascii码以外的正则匹配可能无法得到正确答案。对此hparser提供
-utf8_to_utf32接口(std::string -> std::u32string)和utf32_to_utf8(std::u32string -> std::string)接口。如果有支持u32string(即char32_t存储类型)
-的正则表达式库，可以结合hparser.find接口以及utf8_to_utf32接口执行正则匹配。
+utf8_to_utf32接口(std::string -> std::u32string)和utf32_to_utf8(std::u32string -> std::string)接口。如果有支持u32string(即char32_t存储类型)的正则表达式库，可以结合hparser.find接口以及utf8_to_utf32接口执行正则匹配。
+
+hparser解析过程单遍遍历文本，且未使用递归调用，因此未限制DOM文档树最大深度，最大限制取决于内存等其他系统资源。
 
 # license
 MIT License.
