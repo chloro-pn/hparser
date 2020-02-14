@@ -26,7 +26,7 @@ make
 hparser解析的属性值均没有去除"号。
 
 # doc
-预计分为三部分:hparser查询接口介绍，hparser::element_type类介绍和utf8_to_utf32/utf32_to_utf8接口介绍。
+https://segmentfault.com/a/1190000021749001
 
 # example
 ```
