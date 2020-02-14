@@ -42,6 +42,8 @@ private:
     std::weak_ptr<html_element> parent_;
 
   public:
+    using kv_type = kv;
+
     html_element() = default;
 
     string_type tag() const {
@@ -60,7 +62,7 @@ private:
       return childs_.size();
     }
 
-    kv get_attr(size_t index) const {
+    kv_type get_attr(size_t index) const {
       return attrs_.at(index);
     }
 
@@ -68,7 +70,7 @@ private:
       return childs_.at(index);
     }
 
-    std::vector<kv> get_all_attrs() const {
+    std::vector<kv_type> get_all_attrs() const {
       return attrs_;
     }
 
