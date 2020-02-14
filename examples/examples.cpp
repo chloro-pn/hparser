@@ -1,4 +1,4 @@
-﻿#include "../include/hparser.h"
+#include "../include/hparser.h"
 #include "../third_party/catch.hpp"
 #include <fstream>
 #include <string>
@@ -6,7 +6,7 @@
 #include <cassert>
 
 int main() {
-  std::ifstream in("/home/pn/html/container/examples/1.html", std::ios::binary);
+  std::ifstream in("../../examples/1.html", std::ios::binary);
   assert(in.good() == true);
   std::string content;
   while(true) {
@@ -15,6 +15,7 @@ int main() {
     if(in.eof() == true) {
       break;
     }
+    assert(in.good() == true);
     content.push_back(tmp);
   }
   in.close();
